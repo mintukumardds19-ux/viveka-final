@@ -2,10 +2,6 @@ import OpenAI from "openai";
 
 export const runtime = "nodejs";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -101,12 +97,21 @@ function cleanHistory(history: unknown): ChatMessage[] {
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
       return Response.json(
-        { error: "OPENAI_API_KEY is missing. Please check .env.local." },
+        {
+          error:
+            "OPENAI_API_KEY is missing. Add it in .env.local locally and in Vercel Environment Variables for deployment.",
+        },
         { status: 500 }
       );
     }
+
+    const client = new OpenAI({
+      apiKey,
+    });
 
     const body = await req.json();
 
@@ -150,8 +155,12 @@ Mode Guidance:
     return Response.json({ answer });
   } catch (error) {
     console.error("Chat API error:", error);
+
     return Response.json(
-      { error: "Something went wrong while generating the response." },
+      {
+        error:
+          "Something went wrong while generating the response. Please check OpenAI billing, API key, model name, and Vercel environment variables.",
+      },
       { status: 500 }
     );
   }
