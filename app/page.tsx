@@ -84,7 +84,7 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-[#e6ded0] bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div className="text-xl font-bold text-[#5f3b18]">
-            Viveka<span className="text-[#2f5d50]">.cloud</span>
+            viveka<span className="text-[#2f5d50]">.cloud</span>
           </div>
           <nav className="hidden gap-6 text-sm text-[#5b6472] md:flex">
             <a href="#about">About</a>
