@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -71,15 +72,145 @@ function ReflectionMatrix() {
 }
 
 export default function Home() {
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authMessage, setAuthMessage] = useState("");
+
   const [mode, setMode] = useState("General Dharma Reflection");
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
+  async function loadUserRole(accessToken: string) {
+    const res = await fetch("/api/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!res.ok) {
+      setUserEmail("");
+      setIsAdmin(false);
+      return;
+    }
+
+    const data = await res.json();
+
+    setUserEmail(data.email || "");
+    setIsAdmin(Boolean(data.isAdmin));
+  }
+
+  useEffect(() => {
+    async function initAuth() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user?.email && session.access_token) {
+        setUserEmail(session.user.email);
+        await loadUserRole(session.access_token);
+      }
+
+      setAuthLoading(false);
+    }
+
+    initAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user?.email && session.access_token) {
+        setUserEmail(session.user.email);
+        await loadUserRole(session.access_token);
+      } else {
+        setUserEmail("");
+        setIsAdmin(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleSignup() {
+    setAuthMessage("");
+
+    if (!authEmail.trim() || !authPassword.trim()) {
+      setAuthMessage("Please enter email and password.");
+      return;
+    }
+
+    if (authPassword.length < 6) {
+      setAuthMessage("Password should be at least 6 characters.");
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
+      email: authEmail,
+      password: authPassword,
+    });
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setAuthMessage("Signup successful. You can now login.");
+  }
+
+  async function handleLogin() {
+    setAuthMessage("");
+
+    if (!authEmail.trim() || !authPassword.trim()) {
+      setAuthMessage("Please enter email and password.");
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: authEmail,
+      password: authPassword,
+    });
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setAuthMessage("");
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+
+    setUserEmail("");
+    setIsAdmin(false);
+    setHistory([]);
+    setMessage("");
+  }
+
   async function askDharma(question?: string) {
     const userMessage = question || message;
 
     if (!userMessage.trim() || loading) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setHistory([
+        ...history,
+        {
+          role: "assistant",
+          content: "Please login again before using The Dharma Protocol.",
+        },
+      ]);
+      return;
+    }
 
     const visibleHistory: ChatMessage[] = [
       ...history,
@@ -95,6 +226,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           message: userMessage,
@@ -119,7 +251,7 @@ export default function Home() {
         {
           role: "assistant",
           content:
-            "I could not respond due to a technical issue. Please check your OpenAI API key, billing, and server logs.",
+            "I could not respond due to a technical issue. Please check your login session, OpenAI API key, billing, and server logs.",
         },
       ]);
     } finally {
@@ -127,12 +259,91 @@ export default function Home() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] text-[#5f3b18]">
+        <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
+          Loading Viveka Cloud...
+        </div>
+      </main>
+    );
+  }
+
+  if (!userEmail) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-[#1f2933]">
+        <div className="w-full max-w-md rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
+          <div className="mb-6 text-center">
+            <div className="text-2xl font-bold text-[#5f3b18]">
+              Viveka<span className="text-[#2f5d50]">.cloud</span>
+            </div>
+
+            <p className="mt-2 text-sm text-[#5b6472]">
+              Login to access The Dharma Protocol.
+            </p>
+          </div>
+
+          <label className="text-sm font-semibold text-[#5f3b18]">
+            Email
+          </label>
+
+          <input
+            type="email"
+            value={authEmail}
+            onChange={(e) => setAuthEmail(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-[#e6ded0] p-3"
+            placeholder="you@example.com"
+          />
+
+          <label className="mt-4 block text-sm font-semibold text-[#5f3b18]">
+            Password
+          </label>
+
+          <input
+            type="password"
+            value={authPassword}
+            onChange={(e) => setAuthPassword(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-[#e6ded0] p-3"
+            placeholder="Enter password"
+          />
+
+          {authMessage && (
+            <p className="mt-4 rounded-xl bg-[#fffaf2] p-3 text-sm text-[#8a5a2b]">
+              {authMessage}
+            </p>
+          )}
+
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={handleLogin}
+              className="flex-1 rounded-xl bg-[#8a5a2b] px-4 py-3 font-semibold text-white"
+            >
+              Login
+            </button>
+
+            <button
+              onClick={handleSignup}
+              className="flex-1 rounded-xl border border-[#e6ded0] bg-white px-4 py-3 font-semibold text-[#5f3b18]"
+            >
+              Signup
+            </button>
+          </div>
+
+          <p className="mt-5 text-xs text-[#5b6472]">
+            Admins use the same login page. Admin access is enabled only for
+            approved admin email addresses.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f3ea] text-[#1f2933]">
       <header className="sticky top-0 z-20 border-b border-[#e6ded0] bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div className="text-xl font-bold text-[#5f3b18]">
-            viveka<span className="text-[#2f5d50]">.cloud</span>
+            Viveka<span className="text-[#2f5d50]">.cloud</span>
           </div>
 
           <nav className="hidden gap-6 text-sm text-[#5b6472] md:flex">
@@ -141,6 +352,19 @@ export default function Home() {
             <a href="#vision">MVP-Pro Vision</a>
             <a href="#app">Try It</a>
           </nav>
+
+          <div className="hidden items-center gap-3 text-sm md:flex">
+            <span className="text-[#5b6472]">
+              {isAdmin ? "Admin" : "User"}: {userEmail}
+            </span>
+
+            <button
+              onClick={handleLogout}
+              className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-[#5f3b18]"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -271,6 +495,23 @@ export default function Home() {
         </div>
       </section>
 
+      {isAdmin && (
+        <section className="mx-auto max-w-7xl px-6 py-10">
+          <div className="rounded-3xl border border-[#d4e4dc] bg-[#eef5f2] p-8">
+            <h2 className="text-3xl font-bold text-[#2f5d50]">
+              Admin Panel
+            </h2>
+
+            <p className="mt-3 text-[#5b6472]">
+              You are logged in as an administrator. Future admin capabilities
+              can include user management, usage review, prompt updates,
+              knowledge-base management, model configuration, and governance
+              logs.
+            </p>
+          </div>
+        </section>
+      )}
+
       <section id="app" className="mx-auto max-w-7xl px-6 py-16">
         <h2 className="text-4xl font-bold text-[#5f3b18]">
           Try The Dharma Protocol
@@ -370,7 +611,7 @@ export default function Home() {
           </p>
 
           <p className="mt-3">
-            © 2026 viveka cloud. Building responsible decision intelligence for
+            © 2026 Viveka Cloud. Building responsible decision intelligence for
             the age of AI.
           </p>
         </div>

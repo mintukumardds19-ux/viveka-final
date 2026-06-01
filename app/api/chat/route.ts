@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
@@ -86,7 +87,9 @@ function cleanHistory(history: unknown): ChatMessage[] {
   return history
     .filter((item): item is ChatMessage => {
       if (!item || typeof item !== "object") return false;
+
       const msg = item as Partial<ChatMessage>;
+
       return (
         (msg.role === "user" || msg.role === "assistant") &&
         typeof msg.content === "string"
@@ -95,8 +98,62 @@ function cleanHistory(history: unknown): ChatMessage[] {
     .slice(-8);
 }
 
+async function verifyUser(req: Request) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return {
+      ok: false,
+      error: "Supabase environment variables are missing.",
+      status: 500,
+    };
+  }
+
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace("Bearer ", "");
+
+  if (!token) {
+    return {
+      ok: false,
+      error: "Please login before using The Dharma Protocol.",
+      status: 401,
+    };
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return {
+      ok: false,
+      error: "Your session is invalid. Please login again.",
+      status: 401,
+    };
+  }
+
+  return {
+    ok: true,
+    email: user.email || "",
+    status: 200,
+  };
+}
+
 export async function POST(req: Request) {
   try {
+    const auth = await verifyUser(req);
+
+    if (!auth.ok) {
+      return Response.json(
+        { error: auth.error },
+        { status: auth.status }
+      );
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
@@ -159,7 +216,7 @@ Mode Guidance:
     return Response.json(
       {
         error:
-          "Something went wrong while generating the response. Please check OpenAI billing, API key, model name, and Vercel environment variables.",
+          "Something went wrong while generating the response. Please check OpenAI billing, API key, model name, Supabase authentication, and Vercel environment variables.",
       },
       { status: 500 }
     );
