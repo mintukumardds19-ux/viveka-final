@@ -263,7 +263,7 @@ export default function Home() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] text-[#5f3b18]">
         <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
-          Loading Viveka Cloud...
+          Loading viveka cloud...
         </div>
       </main>
     );
@@ -275,7 +275,7 @@ export default function Home() {
         <div className="w-full max-w-md rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
           <div className="mb-6 text-center">
             <div className="text-2xl font-bold text-[#5f3b18]">
-              Viveka<span className="text-[#2f5d50]">.cloud</span>
+              viveka<span className="text-[#2f5d50]">.cloud</span>
             </div>
 
             <p className="mt-2 text-sm text-[#5b6472]">
@@ -333,6 +333,17 @@ export default function Home() {
             Admins use the same login page. Admin access is enabled only for
             approved admin email addresses.
           </p>
+
+	  <p className="mt-3 text-xs text-[#5b6472]">
+            For access, project updates, or relevant queries, write to{" "}
+            <a
+              href="mailto:info@viveka.cloud"
+              className="font-semibold text-[#8a5a2b] underline"
+            >
+              info@viveka.cloud
+            </a>
+            .
+          </p>
         </div>
       </main>
     );
@@ -343,7 +354,7 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-[#e6ded0] bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div className="text-xl font-bold text-[#5f3b18]">
-            Viveka<span className="text-[#2f5d50]">.cloud</span>
+            viveka<span className="text-[#2f5d50]">.cloud</span>
           </div>
 
           <nav className="hidden gap-6 text-sm text-[#5b6472] md:flex">
@@ -611,11 +622,23 @@ export default function Home() {
           </p>
 
           <p className="mt-3">
-            © 2026 Viveka Cloud. Building responsible decision intelligence for
-            the age of AI.
-          </p>
-        </div>
-      </footer>
+      	    For project updates, access requests, collaborations, or relevant
+            queries, write to{" "}
+          <a
+            href="mailto:info@viveka.cloud"
+            className="font-semibold text-[#8a5a2b] underline"
+          >
+            info@viveka.cloud
+          </a>
+          .
+        </p>
+
+        <p className="mt-3">
+          © 2026 Viveka Cloud. Building responsible decision intelligence for
+          the age of AI.
+        </p>
+      </div>
+    </footer>
     </main>
   );
 }
