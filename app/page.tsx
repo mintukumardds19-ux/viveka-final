@@ -274,14 +274,6 @@ export default function Home() {
       <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-[#1f2933]">
         <div className="w-full max-w-md rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-[#e6ded0] bg-[#fffaf2] shadow-sm">
-              <img
-                src="/dharma-logo.png"
-                alt="The Dharma Protocol Logo"
-                className="h-full w-full object-cover"
-              />
-            </div>
-
             <div className="text-2xl font-bold text-[#5f3b18]">
               viveka<span className="text-[#2f5d50]">.cloud</span>
             </div>
@@ -369,6 +361,7 @@ export default function Home() {
             <a href="#about">About</a>
             <a href="#usecases">Use Cases</a>
             <a href="#vision">MVP-Pro Vision</a>
+            <a href="/knowledge">Knowledge</a>
             <a href="#app">Try It</a>
           </nav>
 
