@@ -195,6 +195,13 @@ export default function KnowledgePage() {
             href="/"
             className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18]"
           >
+            Vedic Knowledge
+          </a>
+
+          <a
+            href="/"
+            className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18]"
+          >
             Back to Home
           </a>
         </div>

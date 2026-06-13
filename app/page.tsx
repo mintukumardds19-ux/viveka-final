@@ -361,6 +361,8 @@ export default function Home() {
             <a href="#about">About</a>
             <a href="#usecases">Use Cases</a>
             <a href="#vision">MVP-Pro Vision</a>
+            <a href="/knowledge">Dharma Repository</a>
+            <a href="/vedic-knowledge">Vedic Knowledge</a>
             <a href="/knowledge">Knowledge</a>
             <a href="#app">Try It</a>
           </nav>
