@@ -1,182 +1,251 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
-type PhilosophyLens = {
-  name: string;
-  question: string;
-  meaning: string;
-  practicalUse: string;
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
 };
 
 const vedas = [
   {
     name: "Rigveda",
-    subtitle: "Knowledge of hymns, praise, cosmic order, and awakening",
+    subtitle: "Invocation, cosmic order, clarity, and awakening",
     essence:
-      "The Rigveda is the oldest of the Vedas and contains hymns addressed to deities such as Agni, Indra, Varuna, Surya, and others. Its deeper value for modern life lies in its attention to order, gratitude, invocation, responsibility, and the relationship between human aspiration and cosmic rhythm.",
-    realLifeUse:
-      "Use the Rigvedic lens when you need clarity of intent, respect for forces larger than yourself, and humility before beginning an important action.",
-    decisionQuestions: [
-      "Is my intention clear before I begin?",
-      "Am I acting with respect for the larger system around me?",
-      "Am I recognizing the visible and invisible forces that support this decision?",
-      "Does this action create order or disorder?",
-    ],
+      "The Rigveda helps us begin with clarity of intent. It reminds us to respect the larger order before acting.",
+    question: "Is my intention clear, and does this action create order or disorder?",
   },
   {
     name: "Yajurveda",
-    subtitle: "Knowledge of action, ritual discipline, duty, and execution",
+    subtitle: "Action, discipline, process, and responsibility",
     essence:
-      "The Yajurveda is closely connected with ritual action and sacred formulas. Its practical wisdom lies in disciplined action, right procedure, responsibility in execution, and the understanding that how an action is performed matters as much as the action itself.",
-    realLifeUse:
-      "Use the Yajurvedic lens when a decision is moving from thought to execution, especially when process, accountability, timing, and role clarity matter.",
-    decisionQuestions: [
-      "Is the process as responsible as the goal?",
-      "Who has the authority to execute this action?",
-      "Have I followed the right sequence before acting?",
-      "Is this action disciplined, accountable, and properly reviewed?",
-    ],
+      "The Yajurveda reminds us that how an action is performed matters as much as the action itself.",
+    question: "Is the process responsible, accountable, and properly sequenced?",
   },
   {
     name: "Samaveda",
-    subtitle: "Knowledge of chants, harmony, rhythm, and alignment",
+    subtitle: "Harmony, rhythm, communication, and alignment",
     essence:
-      "The Samaveda is associated with chants and musical rendering, largely drawing verses from the Rigveda. Its deeper philosophical value is harmony: the alignment of voice, rhythm, intention, and collective resonance.",
-    realLifeUse:
-      "Use the Samavedic lens when a decision affects relationships, culture, teams, communication, morale, or collective harmony.",
-    decisionQuestions: [
-      "Will this decision create harmony or dissonance?",
-      "Have the affected voices been heard?",
-      "Is the communication graceful and respectful?",
-      "Does this action align people, or does it silently divide them?",
-    ],
+      "The Samaveda brings attention to harmony, voice, relationship, communication, and collective alignment.",
+    question: "Will this decision create harmony or silent dissonance?",
   },
   {
     name: "Atharvaveda",
-    subtitle: "Knowledge of everyday life, healing, protection, and practical welfare",
+    subtitle: "Wellbeing, protection, healing, and practical life",
     essence:
-      "The Atharvaveda contains material related to practical life, healing, protection, anxieties, domestic concerns, and human welfare. It brings philosophical attention closer to lived reality, vulnerability, fear, repair, and protection.",
-    realLifeUse:
-      "Use the Atharvavedic lens when decisions affect safety, wellbeing, health, security, risk, social stability, or vulnerable people.",
-    decisionQuestions: [
-      "Who may be harmed if this decision goes wrong?",
-      "Does this action protect the vulnerable?",
-      "What fear, anxiety, or insecurity is hidden in this situation?",
-      "What must be healed, protected, or stabilized before acting?",
-    ],
+      "The Atharvaveda brings wisdom closer to lived reality, fear, vulnerability, healing, and protection.",
+    question: "Who needs protection, healing, or stability before this action proceeds?",
   },
 ];
 
-const philosophyLenses: PhilosophyLens[] = [
-  {
-    name: "Dharma",
-    question: "What is the responsible path here?",
-    meaning:
-      "Dharma asks whether the action is aligned with duty, order, context, and responsibility. It is not merely about personal preference, but about right alignment with the situation.",
-    practicalUse:
-      "Use this lens when choosing between convenience and responsibility.",
-  },
-  {
-    name: "Karma",
-    question: "What consequence will this action create?",
-    meaning:
-      "Karma reminds us that action is never isolated. Every choice creates effects — visible, delayed, personal, social, and institutional.",
-    practicalUse:
-      "Use this lens before taking action that may create long-term consequences.",
-  },
-  {
-    name: "Ahimsa",
-    question: "How can harm be minimized?",
-    meaning:
-      "Ahimsa is the discipline of non-harm. It does not always mean inaction. It means choosing the path that reduces unnecessary injury, humiliation, exploitation, or violence.",
-    practicalUse:
-      "Use this lens when a decision affects people, dignity, trust, or psychological safety.",
-  },
-  {
-    name: "Satya",
-    question: "What truth must not be hidden?",
-    meaning:
-      "Satya asks whether facts, motives, risks, and uncertainties are being honestly represented. A decision built on concealment becomes ethically weak.",
-    practicalUse:
-      "Use this lens when communication, reporting, leadership, governance, or AI transparency is involved.",
-  },
-  {
-    name: "Viveka",
-    question: "What must be distinguished clearly?",
-    meaning:
-      "Viveka means discernment — the ability to distinguish appearance from reality, short-term gain from long-term good, and desire from wisdom.",
-    practicalUse:
-      "Use this lens when a decision is emotionally charged, confusing, or attractive in the short term.",
-  },
-  {
-    name: "Vairagya",
-    question: "What attachment is influencing this choice?",
-    meaning:
-      "Vairagya is wise detachment. It helps identify whether ego, fear, greed, status, comfort, or insecurity is shaping the decision.",
-    practicalUse:
-      "Use this lens when ambition, comparison, anxiety, or personal attachment may distort judgment.",
-  },
-  {
-    name: "Nyaya",
-    question: "Is the reasoning valid?",
-    meaning:
-      "Nyaya emphasizes logic, evidence, inference, and valid reasoning. It asks whether the conclusion follows from reliable grounds.",
-    practicalUse:
-      "Use this lens when analysing arguments, claims, evidence, AI outputs, reports, or decisions.",
-  },
-  {
-    name: "Samkhya",
-    question: "What are the components of this situation?",
-    meaning:
-      "Samkhya helps separate the observer, the system, the forces, the tendencies, and the material conditions. It encourages structured analysis rather than emotional confusion.",
-    practicalUse:
-      "Use this lens to break complex situations into parts before deciding.",
-  },
-  {
-    name: "Yoga",
-    question: "Is the mind steady enough to decide?",
-    meaning:
-      "Yoga reminds us that disturbed attention leads to disturbed decisions. A calm and disciplined mind sees better.",
-    practicalUse:
-      "Use this lens when stress, anger, fear, urgency, or distraction may corrupt judgment.",
-  },
-  {
-    name: "Vedanta",
-    question: "What is the deeper reality beyond the immediate situation?",
-    meaning:
-      "Vedanta asks us to look beyond surface identity, possession, ego, and temporary gain. It invites a larger view of self, purpose, and unity.",
-    practicalUse:
-      "Use this lens when a decision has existential, moral, or identity-level significance.",
-  },
+const modes = [
+  "Indian Philosophy Reflection",
+  "Vedic Knowledge",
+  "Dharma & Karma",
+  "Ahimsa & Satya",
+  "Viveka & Vairagya",
+  "Nyaya & Samkhya",
+  "Yoga & Vedanta",
 ];
 
-const sampleDilemmas = [
-  "Should I choose a higher-paying role that conflicts with my values?",
-  "Should an organization deploy AI even if employees do not fully understand its impact?",
-  "Should a leader hide bad news to protect morale?",
+const examples = [
+  "How can Dharma help me decide between ambition and family responsibility?",
+  "Should a leader hide bad news to protect team morale?",
+  "How would Karma and Ahimsa view layoffs for short-term profit?",
+  "What does Viveka suggest when both options look attractive?",
+  "How can Indian philosophy guide ethical AI decisions?",
   "Should a school rank children publicly based on performance?",
-  "Should a company reduce people to improve short-term margins?",
-  "Should I act quickly, or pause until I understand the consequences?",
 ];
+
+function AncientScanScreen() {
+  const rows = [
+    "ॐ  ऋग्वेद  अग्नि  ऋत  सत्य  १०८  धर्म",
+    "यजुर्वेद  कर्म  यज्ञ  कर्तव्य  अनुशासन",
+    "सामवेद  स्वर  लय  संवाद  सामंजस्य",
+    "अथर्ववेद  शान्ति  रक्षा  भेषज  लोककल्याण",
+    "धर्म  कर्म  अहिंसा  सत्य  विवेक  वैराग्य",
+    "न्याय  प्रमाण  तर्क  अनुमान  निर्णय",
+    "सांख्य  प्रकृति  पुरुष  गुण  विवेक",
+    "योग  चित्त  वृत्ति  निरोध  स्थिरता",
+    "वेदान्त  आत्मन्  ब्रह्म  एकत्व  बोध",
+    "श्रेयस्  प्रेयस्  उत्तरदायित्व  परिणाम",
+  ];
+
+  const signals = [
+    "SCANNING DHARMA",
+    "MAPPING KARMA",
+    "CHECKING AHIMSA",
+    "SEEKING SATYA",
+    "ACTIVATING VIVEKA",
+    "PAUSING BEFORE ACTION",
+    "READING CONSEQUENCE",
+    "FORMING REFLECTION",
+  ];
+
+  return (
+    <div className="my-4 overflow-hidden rounded-3xl border border-[#7fffd4]/30 bg-black p-5 shadow-2xl">
+      <div className="mb-4 flex items-center justify-between border-b border-[#7fffd4]/20 pb-3">
+        <div className="text-xs font-semibold tracking-[0.28em] text-[#7fffd4]">
+          VEDIC REFLECTION ENGINE
+        </div>
+        <div className="animate-pulse text-xs text-[#7fffd4]/80">
+          SCANNING...
+        </div>
+      </div>
+
+      <div className="relative h-64 overflow-hidden font-mono">
+        <div className="absolute inset-0 space-y-3 text-sm text-[#7fffd4]">
+          {rows.map((row, index) => (
+            <div
+              key={row}
+              className="animate-pulse whitespace-nowrap"
+              style={{
+                opacity: 1 - index * 0.06,
+                transform: `translateX(${index % 2 === 0 ? "0px" : "38px"})`,
+              }}
+            >
+              {row}
+            </div>
+          ))}
+        </div>
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+
+        <div className="absolute left-0 top-0 h-full w-full">
+          <div className="h-1 w-full animate-pulse bg-[#7fffd4]/40" />
+        </div>
+
+        <div className="absolute bottom-12 left-0 right-0 grid gap-2 md:grid-cols-4">
+          {signals.map((signal) => (
+            <div
+              key={signal}
+              className="rounded-lg border border-[#7fffd4]/20 bg-[#07130f]/80 px-3 py-2 text-center text-[10px] tracking-[0.18em] text-[#b9ffe9]"
+            >
+              {signal}
+            </div>
+          ))}
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 border-t border-[#7fffd4]/20 pt-3 text-xs tracking-[0.3em] text-[#7fffd4]/70">
+          ॐ // PAUSE • DISCERN • REFLECT • ACT
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function VedicKnowledgePage() {
-  const [selectedLens, setSelectedLens] = useState(philosophyLenses[0]);
-  const [dilemma, setDilemma] = useState(sampleDilemmas[0]);
+  const [mode, setMode] = useState("Indian Philosophy Reflection");
+  const [message, setMessage] = useState("");
+  const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [authLoading, setAuthLoading] = useState(true);
 
-  function generateReflection() {
-    return {
-      first:
-        "Pause first. Do not treat speed as wisdom. The question must be examined through intention, consequence, harm, truth, and responsibility.",
-      second: `${selectedLens.name} asks: ${selectedLens.question}`,
-      third: selectedLens.meaning,
-      fourth: `Applied to your dilemma — "${dilemma}" — this lens suggests that the decision should not be judged only by immediate benefit. It should be tested against duty, consequence, honesty, non-harm, inner clarity, and the wellbeing of affected people.`,
-      fifth:
-        "Suggested next step: write down who benefits, who may be harmed, what truth is being avoided, what attachment may be influencing the decision, and whether a wiser alternative exists.",
+  useEffect(() => {
+    async function checkSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user?.email) {
+        setUserEmail(session.user.email);
+      }
+
+      setAuthLoading(false);
+    }
+
+    checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email || "");
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
+  }, []);
+
+  async function askVedic(question?: string) {
+    const userMessage = question || message;
+
+    if (!userMessage.trim() || loading) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setHistory([
+        ...history,
+        {
+          role: "assistant",
+          content:
+            "Please login from the home page before using the Vedic Knowledge Companion.",
+        },
+      ]);
+      return;
+    }
+
+    const visibleHistory: ChatMessage[] = [
+      ...history,
+      { role: "user", content: userMessage },
+    ];
+
+    setHistory(visibleHistory);
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/vedic-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          mode,
+          history,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+
+      setHistory([
+        ...visibleHistory,
+        { role: "assistant", content: data.answer },
+      ]);
+    } catch {
+      setHistory([
+        ...visibleHistory,
+        {
+          role: "assistant",
+          content:
+            "I could not respond due to a technical issue. Please check your login session, OpenAI API key, billing, and server logs.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const reflection = generateReflection();
+  if (authLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] text-[#5f3b18]">
+        <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
+          Loading Vedic Knowledge...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] text-[#1f2933]">
@@ -191,37 +260,48 @@ export default function VedicKnowledgePage() {
             </div>
           </a>
 
-          <a
-            href="/"
-            className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18]"
-          >
-            Back to Home
-          </a>
+          <div className="flex items-center gap-3">
+            {userEmail ? (
+              <span className="hidden text-sm text-[#5b6472] md:inline">
+                {userEmail}
+              </span>
+            ) : (
+              <span className="hidden text-sm text-[#8a5a2b] md:inline">
+                Login required for chat
+              </span>
+            )}
+
+            <a
+              href="/"
+              className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18]"
+            >
+              Back to Home
+            </a>
+          </div>
         </div>
       </header>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="max-w-5xl">
           <div className="mb-5 inline-block rounded-full border border-[#e6ded0] bg-[#fffaf2] px-4 py-2 text-sm text-[#5f3b18]">
-            Ancient knowledge for modern ethical decisions
+            Ancient wisdom for modern ethical decisions
           </div>
 
           <h1 className="text-5xl font-bold leading-tight text-[#5f3b18] md:text-6xl">
-            Vedic Knowledge & Indian Philosophy Repository
+            Vedic Knowledge & Indian Philosophy Companion
           </h1>
 
           <p className="mt-6 text-xl text-[#5b6472]">
-            This section introduces the four Vedas and key Indian philosophical
-            lenses in a practical way. The aim is not ritual instruction, but
-            ethical reflection: how ancient wisdom can help individuals,
-            leaders, educators, and organizations make more responsible
-            decisions.
+            Explore the four Vedas and Indian philosophical traditions through
+            a practical, interactive companion. Ask real-life dilemmas and
+            reflect through Dharma, Karma, Ahimsa, Satya, Viveka, Nyaya, Yoga,
+            Vedanta, and other Indian wisdom lenses.
           </p>
 
           <p className="mt-4 text-lg text-[#5b6472]">
-            Use this repository as a reflective companion before decisions that
-            affect people, trust, authority, wellbeing, institutions, or the
-            future.
+            This section is not a religious authority or a substitute for
+            professional advice. It is a reflective space for clearer,
+            wiser, more responsible decisions.
           </p>
         </div>
       </section>
@@ -229,14 +309,13 @@ export default function VedicKnowledgePage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-sm">
           <h2 className="text-3xl font-bold text-[#5f3b18]">
-            1. The Four Vedas: A Practical Knowledge Base
+            The Four Vedas as Decision Lenses
           </h2>
 
           <p className="mt-4 text-lg text-[#5b6472]">
-            The Vedas can be approached as ancient knowledge streams that speak
-            to invocation, action, harmony, and welfare. For a modern ethical
-            decision-maker, they can be understood as four complementary ways of
-            seeing life and responsibility.
+            The Vedas can be approached as four complementary knowledge streams:
+            clarity, action, harmony, and wellbeing. For modern ethical
+            decisions, they help us ask better questions before we act.
           </p>
         </div>
 
@@ -258,212 +337,121 @@ export default function VedicKnowledgePage() {
 
               <div className="mt-5 rounded-2xl bg-[#fffaf2] p-5">
                 <p className="font-semibold text-[#8a5a2b]">
-                  Modern decision use
+                  Decision question
                 </p>
-                <p className="mt-2 text-[#5b6472]">{veda.realLifeUse}</p>
-              </div>
-
-              <div className="mt-5">
-                <p className="font-semibold text-[#5f3b18]">
-                  Reflection questions
-                </p>
-                <ul className="mt-3 space-y-2 text-sm text-[#5b6472]">
-                  {veda.decisionQuestions.map((question) => (
-                    <li key={question}>• {question}</li>
-                  ))}
-                </ul>
+                <p className="mt-2 text-[#5b6472]">{veda.question}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="rounded-3xl border border-[#d4e4dc] bg-[#eef5f2] p-8">
-          <h2 className="text-3xl font-bold text-[#2f5d50]">
-            2. The Vedic Decision Map
-          </h2>
-
-          <p className="mt-4 text-lg text-[#5b6472]">
-            Before an important decision, ask which Vedic lens is most needed.
-          </p>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-4">
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h3 className="font-bold text-[#5f3b18]">Rigveda</h3>
-              <p className="mt-2 text-sm text-[#5b6472]">
-                Clarify intention and respect the larger order.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h3 className="font-bold text-[#5f3b18]">Yajurveda</h3>
-              <p className="mt-2 text-sm text-[#5b6472]">
-                Ensure the action and process are disciplined.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h3 className="font-bold text-[#5f3b18]">Samaveda</h3>
-              <p className="mt-2 text-sm text-[#5b6472]">
-                Protect harmony, rhythm, communication, and alignment.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <h3 className="font-bold text-[#5f3b18]">Atharvaveda</h3>
-              <p className="mt-2 text-sm text-[#5b6472]">
-                Protect wellbeing, safety, healing, and vulnerable lives.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <h2 className="text-3xl font-bold text-[#5f3b18]">
-          3. Indian Philosophy Knowledge Base
-        </h2>
-
-        <p className="mt-4 max-w-5xl text-lg text-[#5b6472]">
-          Indian philosophy offers multiple lenses for reflection. These lenses
-          do not give mechanical answers. They help refine perception, clarify
-          responsibility, reduce harm, examine evidence, and distinguish wisdom
-          from impulse.
-        </p>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          {philosophyLenses.map((lens) => (
-            <div
-              key={lens.name}
-              className="rounded-2xl border border-[#e6ded0] bg-white p-6 shadow-sm"
-            >
-              <h3 className="text-xl font-bold text-[#2f5d50]">
-                {lens.name}
-              </h3>
-
-              <p className="mt-3 font-semibold text-[#5f3b18]">
-                Key question: {lens.question}
-              </p>
-
-              <p className="mt-3 text-[#5b6472]">{lens.meaning}</p>
-
-              <p className="mt-3 text-sm text-[#8a5a2b]">
-                Practical use: {lens.practicalUse}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-xl">
-          <h2 className="text-3xl font-bold text-[#5f3b18]">
-            4. Interactive Indian Philosophy Lens
-          </h2>
-
-          <p className="mt-4 max-w-4xl text-lg text-[#5b6472]">
-            Choose a dilemma and a philosophical lens. The tool will generate a
-            reflective decision prompt based purely on Indian philosophical
-            ideas such as Dharma, Karma, Ahimsa, Satya, Viveka, Nyaya, Yoga,
-            and Vedanta.
-          </p>
-
-          <div className="mt-6 grid gap-5 md:grid-cols-2">
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        <div className="rounded-3xl border border-[#e6ded0] bg-white p-6 shadow-xl">
+          <div className="flex flex-col justify-between gap-5 border-b border-[#e6ded0] pb-5 md:flex-row md:items-center">
             <div>
+              <h2 className="text-3xl font-bold text-[#5f3b18]">
+                Interactive Indian Philosophy Chat
+              </h2>
+
+              <p className="mt-2 text-[#5b6472]">
+                Ask a dilemma and continue the conversation. The companion will
+                respond using Indian philosophical lenses rather than fixed
+                pre-written answers.
+              </p>
+            </div>
+
+            <div className="min-w-[260px]">
               <label className="text-sm font-semibold text-[#5f3b18]">
-                Choose a dilemma
+                Reflection Mode
               </label>
 
               <select
-                value={dilemma}
-                onChange={(e) => setDilemma(e.target.value)}
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
                 className="mt-2 w-full rounded-xl border border-[#e6ded0] bg-white p-3"
               >
-                {sampleDilemmas.map((item) => (
+                {modes.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="text-sm font-semibold text-[#5f3b18]">
-                Choose a philosophy lens
-              </label>
-
-              <select
-                value={selectedLens.name}
-                onChange={(e) => {
-                  const nextLens =
-                    philosophyLenses.find(
-                      (lens) => lens.name === e.target.value
-                    ) || philosophyLenses[0];
-
-                  setSelectedLens(nextLens);
-                }}
-                className="mt-2 w-full rounded-xl border border-[#e6ded0] bg-white p-3"
-              >
-                {philosophyLenses.map((lens) => (
-                  <option key={lens.name}>{lens.name}</option>
-                ))}
-              </select>
-            </div>
           </div>
 
-          <div className="mt-8 rounded-3xl border border-[#d4e4dc] bg-[#eef5f2] p-7">
-            <h3 className="text-2xl font-bold text-[#2f5d50]">
-              Reflection Generated
-            </h3>
-
-            <div className="mt-5 space-y-4 text-[#5b6472]">
-              <p>{reflection.first}</p>
-              <p className="font-semibold text-[#5f3b18]">
-                {reflection.second}
-              </p>
-              <p>{reflection.third}</p>
-              <p>{reflection.fourth}</p>
-              <p className="font-semibold text-[#2f5d50]">
-                {reflection.fifth}
-              </p>
+          {!userEmail && (
+            <div className="mt-5 rounded-2xl border border-[#e6ded0] bg-[#fffaf2] p-5 text-[#8a5a2b]">
+              Please login from the home page to use the interactive Vedic
+              Knowledge Companion.
             </div>
-          </div>
-        </div>
-      </section>
+          )}
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-sm">
-          <h2 className="text-3xl font-bold text-[#5f3b18]">
-            5. Indian Philosophy Ethical Decision Checklist
-          </h2>
+          <div className="mt-5 max-h-[620px] space-y-4 overflow-y-auto rounded-3xl bg-[#f7f3ea] p-5">
+            {history.length === 0 && (
+              <div className="rounded-2xl bg-white p-5 text-[#5b6472] shadow-sm">
+                Start with a real question, such as: “How can Dharma help me
+                decide between ambition and family responsibility?”
+              </div>
+            )}
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {[
-              "Dharma: What is my responsibility in this situation?",
-              "Karma: What consequences may follow this action?",
-              "Ahimsa: Who may be harmed, directly or indirectly?",
-              "Satya: What truth must not be hidden?",
-              "Viveka: What must I distinguish more clearly?",
-              "Vairagya: What attachment may be distorting my judgment?",
-              "Nyaya: Is the reasoning valid and evidence-based?",
-              "Yoga: Is my mind steady enough to decide?",
-              "Vedanta: What deeper reality or purpose is being ignored?",
-              "Samvada: Have I allowed dialogue before conclusion?",
-            ].map((item) => (
+            {history.map((item, index) => (
               <div
-                key={item}
-                className="rounded-xl border border-[#e6ded0] bg-[#fffaf2] p-5 text-[#5f3b18]"
+                key={index}
+                className={
+                  item.role === "user"
+                    ? "ml-auto max-w-3xl rounded-2xl bg-[#8a5a2b] p-4 text-white"
+                    : "mr-auto max-w-4xl whitespace-pre-wrap rounded-2xl bg-white p-5 text-[#1f2933] shadow"
+                }
               >
-                {item}
+                {item.content}
               </div>
             ))}
+
+            {loading && <AncientScanScreen />}
           </div>
+
+          <div className="mt-5 flex flex-col gap-3 md:flex-row">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Ask a real-life dilemma through Indian philosophy..."
+              className="min-h-[100px] flex-1 rounded-2xl border border-[#e6ded0] p-4"
+            />
+
+            <button
+              onClick={() => askVedic()}
+              disabled={loading || !userEmail}
+              className="rounded-2xl bg-[#8a5a2b] px-7 py-4 font-semibold text-white disabled:opacity-50"
+            >
+              Ask
+            </button>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            {examples.map((example) => (
+              <button
+                key={example}
+                onClick={() => askVedic(example)}
+                disabled={loading || !userEmail}
+                className="rounded-full border border-[#e6ded0] bg-[#fffaf2] px-4 py-2 text-sm text-[#5f3b18] disabled:opacity-50"
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setHistory([])}
+            className="mt-5 text-sm font-semibold text-[#8a5a2b]"
+          >
+            Clear conversation
+          </button>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="rounded-3xl border border-[#d4e4dc] bg-[#eef5f2] p-8">
           <h2 className="text-3xl font-bold text-[#2f5d50]">
-            6. How This Connects to The Dharma Protocol
+            How This Connects to The Dharma Protocol
           </h2>
 
           <p className="mt-4 text-lg text-[#5b6472]">
@@ -483,7 +471,7 @@ export default function VedicKnowledgePage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="rounded-3xl border border-[#e6ded0] bg-white p-8 shadow-sm">
           <h2 className="text-3xl font-bold text-[#5f3b18]">
-            7. For More Information
+            For More Information
           </h2>
 
           <p className="mt-4 text-lg text-[#5b6472]">
@@ -505,8 +493,8 @@ export default function VedicKnowledgePage() {
           <p>
             This Vedic and Indian Philosophy Knowledge section is for
             reflection, education, and decision-support. It does not replace
-            professional, legal, medical, financial, compliance, employment, or
-            human judgment.
+            religious, professional, legal, medical, financial, compliance,
+            employment, or human judgment.
           </p>
 
           <p className="mt-3">
