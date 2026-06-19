@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import MainNavbar from "../components/MainNavbar";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -351,36 +352,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] text-[#1f2933]">
-      <header className="sticky top-0 z-20 border-b border-[#e6ded0] bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <div className="text-xl font-bold text-[#5f3b18]">
-            viveka<span className="text-[#2f5d50]">.cloud</span>
-          </div>
-
-          <nav className="hidden gap-6 text-sm text-[#5b6472] md:flex">
-            <a href="#about">About</a>
-            <a href="#usecases">Use Cases</a>
-            <a href="#vision">MVP-Pro Vision</a>
-            <a href="/knowledge">Dharma Repository</a>
-            <a href="/vedic-knowledge">Vedic Knowledge</a>
-            <a href="/knowledge">Knowledge</a>
-            <a href="#app">Try It</a>
-          </nav>
-
-          <div className="hidden items-center gap-3 text-sm md:flex">
-            <span className="text-[#5b6472]">
-              {isAdmin ? "Admin" : "User"}: {userEmail}
-            </span>
-
-            <button
-              onClick={handleLogout}
-              className="rounded-full border border-[#e6ded0] bg-white px-4 py-2 text-[#5f3b18]"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <MainNavbar userEmail={userEmail} isAdmin={isAdmin} onLogout={handleLogout} />
+        
 
       <section className="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-[1.1fr_0.9fr]">
         <div>
