@@ -406,7 +406,14 @@ export default function VedicKnowledgePage() {
               </div>
             ))}
 
-            {loading && <AncientScanScreen />}
+            {loading && (
+              <div className="mr-auto max-w-4xl rounded-2xl border border-[#e6ded0] bg-white px-5 py-4 text-[#5b6472] shadow-sm">
+                <span className="font-semibold text-[#5f3b18]">
+                  The Vedic Knowledge Companion is reflecting
+                </span>{" "}
+                — reading the question through Dharma, Karma, Viveka, and ancient Indian wisdom...
+              </div>
+            )}
           </div>
 
           <div className="mt-5 flex flex-col gap-3 md:flex-row">

@@ -24,53 +24,6 @@ const examples = [
   "Should a board approve an AI project without understanding model risk?",
 ];
 
-function ReflectionMatrix() {
-  const matrixRows = [
-    "0101 1100 DHARMA 0011 VIVEKA 1010",
-    "STAKEHOLDER MAP // ACTIVE",
-    "CONSEQUENCE SCAN // RUNNING",
-    "HIDDEN COST DETECTION // RUNNING",
-    "REVERSIBILITY CHECK // RUNNING",
-    "HUMAN ACCOUNTABILITY // REQUIRED",
-    "NON-HARM FILTER // ACTIVE",
-    "LONG-TERM HARMONY // CALCULATING",
-    "RESPONSE FORMATION // IN PROGRESS",
-  ];
-
-  return (
-    <div className="my-4 overflow-hidden rounded-2xl border border-[#7fffd4]/30 bg-black p-4 shadow-xl">
-      <div className="mb-3 flex items-center justify-between border-b border-[#7fffd4]/20 pb-2">
-        <div className="text-xs font-semibold tracking-[0.28em] text-[#7fffd4]">
-          THE DHARMA PROTOCOL
-        </div>
-        <div className="text-xs text-[#7fffd4]/70">REFLECTING...</div>
-      </div>
-
-      <div className="relative h-48 overflow-hidden font-mono text-sm">
-        <div className="absolute inset-0 space-y-2 text-[#7fffd4] opacity-90">
-          {matrixRows.map((row, index) => (
-            <div
-              key={row}
-              className="animate-pulse whitespace-nowrap"
-              style={{
-                opacity: 1 - index * 0.07,
-                transform: `translateX(${index % 2 === 0 ? "0px" : "24px"})`,
-              }}
-            >
-              {row}
-            </div>
-          ))}
-        </div>
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-
-        <div className="absolute bottom-0 left-0 right-0 border-t border-[#7fffd4]/20 pt-2 text-xs tracking-[0.3em] text-[#7fffd4]/70">
-          ANALYSING // PAUSE • REFLECT • ESCALATE • RESPOND
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function Home() {
   const [authEmail, setAuthEmail] = useState("");
@@ -547,7 +500,14 @@ export default function Home() {
               </div>
             ))}
 
-            {loading && <ReflectionMatrix />}
+            {loading && (
+              <div className="mr-auto max-w-4xl rounded-2xl border border-[#e6ded0] bg-white px-5 py-4 text-[#5b6472] shadow-sm">
+                <span className="font-semibold text-[#5f3b18]">
+                  The Dharma Protocol is reflecting
+                </span>{" "}
+                — examining consequence, uncertainty, and human accountability...
+              </div>
+            )}
           </div>
 
           <div className="mt-5 flex flex-col gap-3 md:flex-row">
