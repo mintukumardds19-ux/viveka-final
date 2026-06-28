@@ -22,6 +22,10 @@ const navLinks = [
     href: "#vision",
   },
   {
+    label: "Agentic Solutions",
+    href: "/agentic-solutions",
+  },
+  {
     label: "Dharma Repository",
     href: "/knowledge",
   },
@@ -51,7 +55,7 @@ export default function MainNavbar({
             </div>
           </a>
 
-          <nav className="hidden items-center gap-6 text-sm text-[#5b6472] lg:flex">
+          <nav className="hidden items-center gap-5 text-sm text-[#5b6472] xl:flex">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -63,8 +67,8 @@ export default function MainNavbar({
             ))}
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <span className="rounded-full bg-[#fffaf2] px-4 py-2 text-xs font-semibold text-[#5b6472]">
+          <div className="hidden items-center gap-3 xl:flex">
+            <span className="max-w-[210px] truncate rounded-full bg-[#fffaf2] px-4 py-2 text-xs font-semibold text-[#5b6472]">
               {isAdmin ? "Admin" : "User"}: {userEmail}
             </span>
 
@@ -85,7 +89,7 @@ export default function MainNavbar({
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-xl border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18] lg:hidden"
+            className="rounded-xl border border-[#e6ded0] bg-white px-4 py-2 text-sm font-semibold text-[#5f3b18] xl:hidden"
             aria-label="Open navigation menu"
           >
             {mobileOpen ? "Close" : "Menu"}
@@ -93,7 +97,7 @@ export default function MainNavbar({
         </div>
 
         {mobileOpen && (
-          <div className="border-t border-[#e6ded0] py-4 lg:hidden">
+          <div className="border-t border-[#e6ded0] py-4 xl:hidden">
             <nav className="flex flex-col gap-3 text-sm text-[#5b6472]">
               {navLinks.map((link) => (
                 <a

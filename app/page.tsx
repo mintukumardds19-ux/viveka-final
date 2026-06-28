@@ -340,6 +340,14 @@ export default function Home() {
             >
               Learn More
             </a>
+
+            <a
+              href="/agentic-solutions"
+              className="rounded-full border border-[#e6ded0] bg-white px-6 py-3 font-semibold text-[#5f3b18] shadow-sm"
+            >
+              Explore Agentic Solutions
+            </a>
+
           </div>
         </div>
 
