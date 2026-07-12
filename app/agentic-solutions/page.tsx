@@ -166,13 +166,13 @@ const verticalTemplates = [
 const roadmap = [
   {
     phase: "Phase 1",
-    title: "Static Product Page",
-    text: "Present the agentic solutions portfolio, positioning, top use cases, and MVP roadmap.",
+    title: "Static Product",
+    text: "Static agentic solutions portfolio.",
   },
   {
     phase: "Phase 2",
     title: "Dharma Decision Console MVP",
-    text: "Build a form where users enter decision title, context, stakeholders, potential action, urgency, and risk category.",
+    text: "Users enter decision title, context, stakeholders, potential action, urgency, and risk category.",
   },
   {
     phase: "Phase 3",
@@ -182,12 +182,12 @@ const roadmap = [
   {
     phase: "Phase 4",
     title: "Vertical Templates",
-    text: "Add board, procurement, telecom, HR, incident, and compliance templates on the same engine.",
+    text: "Board level decisions, procurement, telecom, HR, incident, and compliance templates on the same engine.",
   },
   {
     phase: "Phase 5",
     title: "Audit and Human Review",
-    text: "Add approval status, reviewer notes, downloadable decision note, and audit history.",
+    text: "Approval status, reviewer notes, downloadable decision note, and audit history.",
   },
 ];
 
@@ -413,7 +413,7 @@ export default function AgenticSolutionsPage() {
         </h2>
 
         <p className="mt-4 max-w-4xl text-lg text-[#5b6472]">
-          All agentic solutions should be built on one reusable governance
+          This agentic solutions  built on one reusable governance
           engine. This keeps the product scalable, modular, and enterprise
           ready.
         </p>
@@ -441,8 +441,7 @@ export default function AgenticSolutionsPage() {
           </h2>
 
           <p className="mt-4 max-w-4xl text-lg text-[#5b6472]">
-            Once the Dharma Decision Console is working, the next step is to add
-            vertical templates. These templates reuse the same engine but change
+            These templates reuse the same engine but change
             the input fields, risk rules, examples, and decision outputs.
           </p>
 
