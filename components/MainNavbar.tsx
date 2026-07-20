@@ -47,9 +47,20 @@ export default function MainNavbar({
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex items-center justify-between py-4">
           <a href="/" className="leading-tight">
-            <div className="text-xl font-bold text-[#5f3b18]">
-              viveka<span className="text-[#2f5d50]">.cloud</span>
+            <div className="flex items-center gap-2">
+              <div className="text-xl font-bold text-[#5f3b18]">
+                viveka<span className="text-[#2f5d50]">.cloud</span>
+              </div>
+
+              <span className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-md border border-[#e6ded0] bg-[#ffe100] shadow-sm">
+                <img
+                  src="/dp-logo.png"
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </span>
             </div>
+
             <div className="hidden text-xs tracking-[0.18em] text-[#5b6472] sm:block">
               THE DHARMA PROTOCOL
             </div>
